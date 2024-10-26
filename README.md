@@ -1,4 +1,4 @@
-# Network-Software
+# Network Software
 * **운영체제**: Windows 11
 * **개발 도구**: Visual Studio 또는 GCC를 지원하는 Windows용 C 컴파일러
 ## [1. UDP Socket Programming](https://github.com/qkrdudwls/Network-Software/tree/main/UDP%20Socket%20Programming)
