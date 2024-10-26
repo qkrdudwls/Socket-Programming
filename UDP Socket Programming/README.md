@@ -1,4 +1,7 @@
 # UDP Socket Programming
+* **운영체제**: Windows 11
+* **개발 도구**: Visual Studio 또는 GCC를 지원하는 Windows용 C 컴파일러
+* **네트워크 라이브러리**: WinSock2
 ## Contents
 ### Both Client and Server
 - 서버 IP 주소와 포트 번호를 외부 입력으로 받아들여서 처리한다.
