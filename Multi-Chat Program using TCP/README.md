@@ -1,4 +1,7 @@
 # Multi-Chat Program using TCP
+* **운영체제**: Windows 11
+* **개발 도구**: Visual Studio 또는 GCC를 지원하는 Windows용 C 컴파일러
+* **네트워크 라이브러리**: WinSock2
 ## Contents
 * UDP의 가장 큰 특징 중 하나는 connectionless라는 점이기 때문에, 기존 환경에서는 클라이언트가 빠져나가나는 것을 확인하기 어렵다는 문제점이 있다.
 * TCP의 경우 connection-oriented라는 특징을 가지므로, 클라이언트가 접속하고 종료하는 것을 확인하는 것이 가능하다.
