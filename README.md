@@ -6,4 +6,5 @@
 ## 3. Multi-Chat Program using TCP
 * TCP 소켓을 사용한 N:1 클라이언트 서버 모델.
 ## 4. UDP-based ARQ Programming
+* UDP 소켓을 사용한 Stop-and-Wait ARQ 클라이언트-서버 모델.
 
