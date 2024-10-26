@@ -1,4 +1,7 @@
 # Multi-Chat Program using UDP
+* **운영체제**: Windows 11
+* **개발 도구**: Visual Studio 또는 GCC를 지원하는 Windows용 C 컴파일러
+* **네트워크 라이브러리**: WinSock2
 ## Contents
 ### Client
 * 클라이언트 프로그램에서는 메시지 전송과 수신이 동시에 이루어진다.
