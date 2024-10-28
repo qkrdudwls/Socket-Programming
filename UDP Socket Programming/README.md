@@ -54,7 +54,24 @@ Command Code는 0x04이다. 클라이언트는 메시지 내용 없이 서버에
 
 ## 주요 코드
 ### Client
-
+- 소켓 생성
+```c
+    SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s == INVALID_SOCKET) {
+        fprintf(stderr, "socket() failed\n");
+        exit(1);
+    }
+```
+- 서버의 IP 주소 및 포트 번호 입력
+```c
+    char serverIP[20] = "";
+    int PORT = 0;
+    printf("Input Server IP : ");
+    scanf("%s", serverIP);
+    printf("Input Server Port : ");
+    scanf("%d", &PORT);
+    getchar();
+```
 ### Server
 
 ## 동작 과정
