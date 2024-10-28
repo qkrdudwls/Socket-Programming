@@ -86,31 +86,31 @@ Command Code는 0x04이다. 클라이언트는 메시지 내용 없이 서버에
 ```
 - Command Code 복사
 ```c
-            command_code = htons(0x01);
-            memcpy(message, &command_code, sizeof(command_code));
+    command_code = htons(0x01);
+    memcpy(message, &command_code, sizeof(command_code));
 ```
 - 메시지 전송
 ```c
-            retval = sendto(s, message, totalLength, 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
-            if (retval == SOCKET_ERROR) {
-                fprintf(stderr, "sendto() failed\n");
-                continue;
-            }
-            else {
-                printf("Send Message!\n\n");
-            }
+    retval = sendto(s, message, totalLength, 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    if (retval == SOCKET_ERROR) {
+        fprintf(stderr, "sendto() failed\n");
+        continue;
+    }
+    else {
+        printf("Send Message!\n\n");
+    }
 ```
 - 메시지 수신
 ```c
-            clientAddrLength = sizeof(clientAddr);
-            retval = recvfrom(s, message, BUFSIZE, 0, (struct sockaddr*)&clientAddr, &clientAddrLength);
-            if (retval == SOCKET_ERROR) {
-                fprintf(stderr, "recvfrom() failed\n");
-                continue;
-            }
-            if (retval < BUFSIZE) {
-                message[retval] = '\0';
-            }
+    clientAddrLength = sizeof(clientAddr);
+    retval = recvfrom(s, message, BUFSIZE, 0, (struct sockaddr*)&clientAddr, &clientAddrLength);
+    if (retval == SOCKET_ERROR) {
+          fprintf(stderr, "recvfrom() failed\n");
+          continue;
+    }
+    if (retval < BUFSIZE) {
+          message[retval] = '\0';
+    }
 ```
 ### Server
 - 포트 번호 설정
@@ -161,28 +161,28 @@ Command Code는 0x04이다. 클라이언트는 메시지 내용 없이 서버에
 ```
 - 메시지 수신
 ```c
-        clientAddrLength = sizeof(clientAddr);
-        retval = recvfrom(s, message, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
-        if (retval == SOCKET_ERROR) {
-            fprintf(stderr, "recvfrom() failed\n");
-            continue;
-        }
-        if (retval < BUFSIZE) {
-            message[retval] = '\0';
-        }
+    clientAddrLength = sizeof(clientAddr);
+    retval = recvfrom(s, message, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
+    if (retval == SOCKET_ERROR) {
+        fprintf(stderr, "recvfrom() failed\n");
+        continue;
+    }
+    if (retval < BUFSIZE) {
+        message[retval] = '\0';
+    }
 ```
 - Command Code 추출
 ```c
-        memcpy(&command_code, message, sizeof(command_code));
-        command_code = ntohs(*(unsigned short*)message);
+    memcpy(&command_code, message, sizeof(command_code));
+    command_code = ntohs(*(unsigned short*)message);
 ```
 - 메시지 전송
 ```c
-        retval = sendto(s, response, strlen(response), 0, (SOCKADDR*)&clientAddr, sizeof(clientAddr));
-        if (retval == SOCKET_ERROR) {
-            fprintf(stderr, "sendto() failed\n");
-            continue;
-        }
+    retval = sendto(s, response, strlen(response), 0, (SOCKADDR*)&clientAddr, sizeof(clientAddr));
+    if (retval == SOCKET_ERROR) {
+        fprintf(stderr, "sendto() failed\n");
+        continue;
+    }
 ```
 ## 동작 과정
 ### Client
