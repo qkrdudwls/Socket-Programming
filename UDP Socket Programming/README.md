@@ -72,8 +72,118 @@ Command Code는 0x04이다. 클라이언트는 메시지 내용 없이 서버에
     scanf("%d", &PORT);
     getchar();
 ```
+- 소켓 주소 구조체 초기화
+```c
+    SOCKADDR_IN serverAddr = { 0 };
+    ZeroMemory(&serverAddr, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = inet_addr(serverIP);
+    if (serverAddr.sin_addr.s_addr == INADDR_NONE) {
+        fprintf(stderr, "inet_addr() failed\n");
+        exit(1);
+    }
+    serverAddr.sin_port = htons(PORT);
+```
+- Command Code 복사
+```c
+            command_code = htons(0x01);
+            memcpy(message, &command_code, sizeof(command_code));
+```
+- 메시지 전송
+```c
+            retval = sendto(s, message, totalLength, 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+            if (retval == SOCKET_ERROR) {
+                fprintf(stderr, "sendto() failed\n");
+                continue;
+            }
+            else {
+                printf("Send Message!\n\n");
+            }
+```
+- 메시지 수신
+```c
+            clientAddrLength = sizeof(clientAddr);
+            retval = recvfrom(s, message, BUFSIZE, 0, (struct sockaddr*)&clientAddr, &clientAddrLength);
+            if (retval == SOCKET_ERROR) {
+                fprintf(stderr, "recvfrom() failed\n");
+                continue;
+            }
+            if (retval < BUFSIZE) {
+                message[retval] = '\0';
+            }
+```
 ### Server
+- 포트 번호 설정
+```c
+    int PORT = 0;
+    printf("Input Server Port : ");
+    scanf("%d", &PORT);
+    while (getchar() != '\n');
+```
+- 소켓 생성
+```c
+    SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s == INVALID_SOCKET) {
+        fprintf(stderr, "socket() failed\n");
+        exit(1);
+    }
+```
+- 소켓 주소 구조체 초기화 및 바인딩
+```c
+    SOCKADDR_IN serverAddr;
+    ZeroMemory(&serverAddr, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serverAddr.sin_port = htons(PORT);
+    retval = bind(s, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    if (retval == SOCKET_ERROR) {
+        fprintf(stderr, "bind() failed\n");
+        exit(1);
+    }
+```
+- 호스트 이름 추출
+```c
+    char hostname[256];
+    retval = gethostname(hostname, sizeof(hostname));
+    if (retval == SOCKET_ERROR) {
+        fprintf(stderr, "gethostname() failed\n");
+        exit(1);
+    }
+```
+- 호스트 이름을 기반으로 IP 주소 구하기
+```c
+    struct addrinfo hints, * res = NULL;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_flags = AI_PASSIVE;
 
+```
+- 메시지 수신
+```c
+        clientAddrLength = sizeof(clientAddr);
+        retval = recvfrom(s, message, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
+        if (retval == SOCKET_ERROR) {
+            fprintf(stderr, "recvfrom() failed\n");
+            continue;
+        }
+        if (retval < BUFSIZE) {
+            message[retval] = '\0';
+        }
+```
+- Command Code 추출
+```c
+        memcpy(&command_code, message, sizeof(command_code));
+        command_code = ntohs(*(unsigned short*)message);
+```
+- 메시지 전송
+```c
+        retval = sendto(s, response, strlen(response), 0, (SOCKADDR*)&clientAddr, sizeof(clientAddr));
+        if (retval == SOCKET_ERROR) {
+            fprintf(stderr, "sendto() failed\n");
+            continue;
+        }
+```
 ## 동작 과정
 ### Client
 1. 클라이언트는 Winsock을 초기화하고 UDP 소켓을 생성한다.
