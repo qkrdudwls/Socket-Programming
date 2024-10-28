@@ -26,21 +26,26 @@
 - Destination Port: 수신자의 포트 번호로, 외부 입력으로 결정된다.
 - Length: 전체 UDP 패킷의 길이를 나타낸다.
 - Checksum: 데이터의 무결성을 검증하기 위한 값이다.
+![image](https://github.com/user-attachments/assets/33ead910-568f-4ee8-a667-c784f60246cf)
 
 UDP 데이터는 2 바이트 크기의 hexadecimal 값이 Command Code와 가변 길이의 문자열인 메시지로 이루어진다. 클라이언트와 서버 모두 전송하고 수신할 수 있는 데이터의 최대 크기는 512 바이트로 제한한다.
 ## Semantics
 클라이언트가 서버에게 데이터를 전송할 때, 데이터의 Command Code는 클라이언트가 선택한 메시지 형식에 따라 달라진다. 
 #### echo
 Command Code는 0x01이다. 클라이언트는 서버에게 보낼 메시지 내용을 입력 받고, 서버는 클라이언트로부터 수신한 메시지 그대로 클라이언트에게 전송한다.
+![image](https://github.com/user-attachments/assets/2d1dc692-d48f-43f2-89e5-6811354d33cd)
 
 #### chat
 Command Code는 0x02이다. 클라이언트는 서버에게 보낼 메시지 내용을 외부로부터 입력 받는다. 서버는 메시지 수신 후, 보낼 메시지 내용을 외부 입력으로 받아들이고, 클라이언트에게 전송한다.
+![image](https://github.com/user-attachments/assets/49356d7c-54db-46d3-bf3b-04f2dba2a9d8)
 
 #### stat
 Command Code는 0x03이다. 클라이언트는 외부 입력으로 받아들인 stat 명령어와 일치하는 메시지를 전송하고, 서버는 수신한 메시지에 해당하는 현재까지의 통계 데이터를 클라이언트에게 전송한다. 
+![image](https://github.com/user-attachments/assets/c9c3a5b7-82af-4ddf-af20-840a10491fda)
 
 #### quit
 Command Code는 0x04이다. 클라이언트는 메시지 내용 없이 서버에게 데이터를 전송한다.
+![image](https://github.com/user-attachments/assets/7f508c6f-ca0c-49bb-b8e9-d3296084f98b)
 
 ## 주요 코드
 ### Client
