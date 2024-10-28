@@ -20,6 +20,7 @@
 - 클라이언트가 요구하는 형식에 맞추어 동작한다.
 ## Syntax
 ![image](https://github.com/user-attachments/assets/e26a4dce-78fd-47cc-b97e-189da8d35b8e)
+
 8 바이트 크기의 UDP 헤더는 Source Port, Destination Port, Length, 그리고 Checksum으로 이루어진다.
 - Source Port: 송신자의 포트 번호이다.
 - Destination Port: 수신자의 포트 번호로, 외부 입력으로 결정된다.
