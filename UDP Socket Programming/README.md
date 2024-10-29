@@ -19,6 +19,7 @@
 ### Server
 - 클라이언트가 요구하는 형식에 맞추어 동작한다.
 ## Syntax
+### UDP Header
 ![image](https://github.com/user-attachments/assets/e26a4dce-78fd-47cc-b97e-189da8d35b8e)
 
 8 바이트 크기의 UDP 헤더는 Source Port, Destination Port, Length, 그리고 Checksum으로 이루어진다.
@@ -27,6 +28,7 @@
 - Length: 전체 UDP 패킷의 길이를 나타낸다.
 - Checksum: 데이터의 무결성을 검증하기 위한 값이다.
 
+### UDP Data
 ![image](https://github.com/user-attachments/assets/33ead910-568f-4ee8-a667-c784f60246cf)
 
 UDP 데이터는 2 바이트 크기의 hexadecimal 값이 Command Code와 가변 길이의 문자열인 메시지로 이루어진다. 클라이언트와 서버 모두 전송하고 수신할 수 있는 데이터의 최대 크기는 512 바이트로 제한한다.
