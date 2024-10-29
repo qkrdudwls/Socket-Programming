@@ -116,56 +116,56 @@
 ```
 - 메시지 전송
 ```c
-  retval = send(s, totalMessage, strlen(totalMessage), 0);
-		if (strcmp(message, "quit") == 0) {
-			printf("서버와의 연결을 종료합니다.\n");
-			isThreadRunning = 0;
-			break;
-		}
-		if (retval == SOCKET_ERROR) {
-			fprintf(stderr, "send() failed\n");
-			break;
-		}
-		else {
-			printf("Send Message!\n");
-			printf("\n");
-		}
+	retval = send(s, totalMessage, strlen(totalMessage), 0);
+	if (strcmp(message, "quit") == 0) {
+		printf("서버와의 연결을 종료합니다.\n");
+		isThreadRunning = 0;
+		break;
+	}
+	if (retval == SOCKET_ERROR) {
+		fprintf(stderr, "send() failed\n");
+		break;
+	}
+	else {
+		printf("Send Message!\n");
+		printf("\n");
+	}
 ```
 - 메시지 수신
 ```c
-retval = recv(s, message, BUFSIZE - 1, 0); 
-		if (retval == SOCKET_ERROR) {
-			error = WSAGetLastError();
-			if (error == WSAEINVAL || error == WSAEWOULDBLOCK) {
-				Sleep(100);
-				continue;
-			}
-			else {
-				fprintf(stderr, "recv() failed\n");
-				break;
-			}
+	retval = recv(s, message, BUFSIZE - 1, 0); 
+	if (retval == SOCKET_ERROR) {
+		error = WSAGetLastError();
+		if (error == WSAEINVAL || error == WSAEWOULDBLOCK) {
+			Sleep(100);
+			continue;
 		}
+		else {
+			fprintf(stderr, "recv() failed\n");
+			break;
+		}
+	}
 ```
 - 프로그램 종료
 ```c
-message[retval] = '\0';
-			printf("\nRecieved Message: %s\n", message);
-			if (strcmp(message, "[Server] 서버가 종료되었습니다.") == 0) {
-				printf("서버와의 연결이 종료되었습니다.\n");
-				exit(0);
-			}
+	message[retval] = '\0';
+	printf("\nRecieved Message: %s\n", message);
+	if (strcmp(message, "[Server] 서버가 종료되었습니다.") == 0) {
+		printf("서버와의 연결이 종료되었습니다.\n");
+		exit(0);
+	}
 ```
 ### Server
 - 클라이언트 정보 구조체
 ```c
-typedef struct {
-	char nickname[20]; // 닉네임
-	SOCKET socket; // 소켓
-	SOCKADDR_IN clientIPAddr; // 클라이언트 IP 주소
-	int port; // 클라이언트 포트
-	bool connected; // 연결 상태
-	bool saveInfo; // 닉네임 정보 저장 여부
-}CLIENT;
+	typedef struct {
+		char nickname[20]; // 닉네임
+		SOCKET socket; // 소켓
+		SOCKADDR_IN clientIPAddr; // 클라이언트 IP 주소
+		int port; // 클라이언트 포트
+		bool connected; // 연결 상태
+		bool saveInfo; // 닉네임 정보 저장 여부
+	}CLIENT;
 ```
 - 서버 포트 번호 설정
 ```c
@@ -209,187 +209,186 @@ typedef struct {
 ```
 - 닉네임 파싱
 ```c
-void parseNickname(char* receivedMessage, char* nickname) {
-	char* start = strchr(receivedMessage, '[');
-	char* end = strchr(receivedMessage, ']');
+	void parseNickname(char* receivedMessage, char* nickname) {
+		char* start = strchr(receivedMessage, '[');
+		char* end = strchr(receivedMessage, ']');
 
-	if (start != NULL && end != NULL && end > start) {
-		strncpy(nickname, start + 1, end - start - 1);
-		nickname[end - start - 1] = '\0';
+		if (start != NULL && end != NULL && end > start) {
+			strncpy(nickname, start + 1, end - start - 1);
+			nickname[end - start - 1] = '\0';
+		}
+		else {
+			strcpy(nickname, "Unknown");
+		}
 	}
-	else {
-		strcpy(nickname, "Unknown");
-	}
-}
 ```
 - 메시지 파싱
 ```c
-void parseMessage(char* receivedMessage, char* message) {
-	char* end = strchr(receivedMessage, ']');
-	char* trimedMessage = NULL;
+	void parseMessage(char* receivedMessage, char* message) {
+		char* end = strchr(receivedMessage, ']');
+		char* trimedMessage = NULL;
 
-	if (end != NULL) {
-		strcpy(message, end + 1);
-		message[BUFSIZE - (end - receivedMessage + 1)] = '\0';
+		if (end != NULL) {
+			strcpy(message, end + 1);
+			message[BUFSIZE - (end - receivedMessage + 1)] = '\0';
 
-		trimedMessage = message;
-		while (*trimedMessage == ' ') {
-			trimedMessage++;
+			trimedMessage = message;
+			while (*trimedMessage == ' ') {
+				trimedMessage++;
+			}
+			strcpy(message, trimedMessage);
 		}
-		strcpy(message, trimedMessage);
+		else {
+			strcpy(message, receivedMessage);
+		}
 	}
-	else {
-		strcpy(message, receivedMessage);
-	}
-}
 ```
 - select() 함수를 이용하여 소켓의 상태 변화 감지
 ```c
-select(maxSocket + 1, &readfds, NULL, NULL, NULL);
+	select(maxSocket + 1, &readfds, NULL, NULL, NULL);
 ```
 - 클라이언트 접속 요청 수락
 ```c
 	clientSocket = accept(listenSocket, (SOCKADDR*)&clientAddr, &clientAddrLength);
-			if (clientSocket == INVALID_SOCKET) {
-				if (isThreadRunning != 1) {
-					break;
-				}
-				fprintf(stderr, "accept() failed\n");
-				continue;
-			}
+	if (clientSocket == INVALID_SOCKET) {
+		if (isThreadRunning != 1) {
+			break;
+		}
+		fprintf(stderr, "accept() failed\n");
+			continue;
+	}
 ```
 - 클라이언트 정보 저장
 ```c
-if (clientCount < MAX_CLIENTS) {
-				clientInfo[clientCount].socket = clientSocket;
-				clientInfo[clientCount].clientIPAddr = clientAddr;
-				clientInfo[clientCount].port = ntohs(clientAddr.sin_port);
-				clientInfo[clientCount].connected = true; // 연결 상태 변경
-				clientInfo[clientCount].saveInfo = false; // 닉네임 정보 저장 여부 초기화
-				clientCount++;
-			}
-			else {
-				printf("최대 클라이언트 수를 초과했습니다.\n");
-				closesocket(clientSocket);
-			}
+	if (clientCount < MAX_CLIENTS) {
+		clientInfo[clientCount].socket = clientSocket;
+		clientInfo[clientCount].clientIPAddr = clientAddr;
+		clientInfo[clientCount].port = ntohs(clientAddr.sin_port);
+		clientInfo[clientCount].connected = true; // 연결 상태 변경
+		clientInfo[clientCount].saveInfo = false; // 닉네임 정보 저장 여부 초기화
+		clientCount++;
+	}
+	else {
+		printf("최대 클라이언트 수를 초과했습니다.\n");
+		closesocket(clientSocket);
+	}
 ```
 - 메시지 수신
 ```c
-retval = recv(clientInfo[i].socket, receivedMessage, BUFSIZE, 0);
+	retval = recv(clientInfo[i].socket, receivedMessage, BUFSIZE, 0);
 ```
 - 닉네임 저장
 ```c
-if (clientInfo[i].saveInfo == false) {
-					nickname[0] = '\0';
-					parseNickname(receivedMessage, nickname);
+	if (clientInfo[i].saveInfo == false) {
+		nickname[0] = '\0';
+		parseNickname(receivedMessage, nickname);
 
-					strcpy(clientInfo[i].nickname, nickname);
-					clientInfo[i].saveInfo = true; 
-					continue; 
-				}
+		strcpy(clientInfo[i].nickname, nickname);
+		clientInfo[i].saveInfo = true; 
+		continue; 
+	}
 ```
 - 클라이언트 연결 종료 여부 확인
 ```c
-if (strcmp(message, "quit") == 0 || retval == SOCKET_ERROR || retval == 0) {
-					FD_CLR(clientInfo[i].socket, &readfds);
-					closesocket(clientInfo[i].socket);
+	if (strcmp(message, "quit") == 0 || retval == SOCKET_ERROR || retval == 0) {
+		FD_CLR(clientInfo[i].socket, &readfds);
+		closesocket(clientInfo[i].socket);
 
-					EnterCriticalSection(&cs);
-					clientInfo[i].connected = false; 
-					LeaveCriticalSection(&cs);
+		EnterCriticalSection(&cs);
+		clientInfo[i].connected = false; 
+		LeaveCriticalSection(&cs);
 
-					maxSocket = listenSocket;
-					for (int j = 0; j < clientCount; j++) {
-						if (clientInfo[j].connected == true && clientInfo[j].socket > maxSocket) {
-							maxSocket = clientInfo[j].socket;
-						}
-					}
-					continue;
-				}
+		maxSocket = listenSocket;
+		for (int j = 0; j < clientCount; j++) {
+			if (clientInfo[j].connected == true && clientInfo[j].socket > maxSocket) {
+				maxSocket = clientInfo[j].socket;
+			}
+		}
+		continue;
+	}
 ```
 - 접속 중인 다른 클라이언트들에게 메시지 echo
 ```c
-for (int j = 0; j < clientCount; j++) {
-						if (i != j && clientInfo[j].connected == true) {
-							retval = send(clientInfo[j].socket, receivedMessage, strlen(receivedMessage), 0);
-							if (retval == SOCKET_ERROR) {
-								fprintf(stderr, "send() failed\n");
-								break;
-							}
-						}
-					}
+	for (int j = 0; j < clientCount; j++) {
+		if (i != j && clientInfo[j].connected == true) {
+			retval = send(clientInfo[j].socket, receivedMessage, strlen(receivedMessage), 0);
+			if (retval == SOCKET_ERROR) {
+				fprintf(stderr, "send() failed\n");
+				break;
+			}
+		}
+	}
 ```
 - 명령 메뉴 출력
 ```c
-void printCommandMenu() {
-	printf("=========================================\n");
-	printf("=================Command=================\n");
-	printf("1. 클라이언트 정보 출력\n");
-	printf("2. 분당 평균 메시지 수 출력\n");
-	printf("3. 서버 종료\n");
-	printf("=========================================\n");
-	printf("Input Command (숫자로 입력): ");
-}
+	void printCommandMenu() {
+		printf("=========================================\n");
+		printf("=================Command=================\n");
+		printf("1. 클라이언트 정보 출력\n");
+		printf("2. 분당 평균 메시지 수 출력\n");
+		printf("3. 서버 종료\n");
+		printf("=========================================\n");
+		printf("Input Command (숫자로 입력): ");
+	}
 ```
 - 클라이언트 정보 출력
 ```c
-void printClientInfo() {
-	EnterCriticalSection(&cs);
-	printf("=========================================\n");
-	printf("전체 클라이언트 수: %d\n", clientCount);
-	if (clientCount != 0) {
-		for (int i = 0; i < clientCount; i++) {
-			printf("%d. 닉네임: %s , IP: %s , Port: %d , 연결 상태: %s\n", i + 1, clientInfo[i].nickname, inet_ntoa(clientInfo[i].clientIPAddr.sin_addr), clientInfo[i].port, clientInfo[i].connected ? "접속 중" : "종료");
+	void printClientInfo() {
+		EnterCriticalSection(&cs);
+		printf("=========================================\n");
+		printf("전체 클라이언트 수: %d\n", clientCount);
+		if (clientCount != 0) {
+			for (int i = 0; i < clientCount; i++) {
+				printf("%d. 닉네임: %s , IP: %s , Port: %d , 연결 상태: %s\n", i + 1, clientInfo[i].nickname, inet_ntoa(clientInfo[i].clientIPAddr.sin_addr), clientInfo[i].port, clientInfo[i].connected ? "접속 중" : "종료");
+			}
 		}
+		LeaveCriticalSection(&cs);
 	}
-	LeaveCriticalSection(&cs);
-}
 ```
 - 메시지 통계 출력
 ```c
-void printMessageStat(time_t startTime) {
-	EnterCriticalSection(&cs);
-	time_t currentTime = time(NULL);
-	double elapsedTime = difftime(currentTime, startTime) / 60.0;
-	int averageMessageCount = (int)(messageCount / elapsedTime);
-	if (averageMessageCount > 0) {
-		printf("=========================================\n");
-		printf("분당 평균 메시지 수: %d\n", averageMessageCount);
+	void printMessageStat(time_t startTime) {
+		EnterCriticalSection(&cs);
+		time_t currentTime = time(NULL);
+		double elapsedTime = difftime(currentTime, startTime) / 60.0;
+		int averageMessageCount = (int)(messageCount / elapsedTime);
+		if (averageMessageCount > 0) {
+			printf("=========================================\n");
+			printf("분당 평균 메시지 수: %d\n", averageMessageCount);
+		}
+		else {
+			printf("=========================================\n");
+			printf("전체 메시지 수: %d\n", messageCount);
+		}
+		LeaveCriticalSection(&cs);
 	}
-	else {
-		printf("=========================================\n");
-		printf("전체 메시지 수: %d\n", messageCount);
-	}
-	LeaveCriticalSection(&cs);
-}
 ```
 - 서버 종료 메시지 전송
 ```c
-void sendTerminateMessage(SOCKET s) {
-	char terminateMessage[BUFSIZE] = "[Server] 서버가 종료되었습니다.";
-	for (int i = 0; i < clientCount; i++) {
-		if (clientInfo[i].connected == true) {
-			send(clientInfo[i].socket, terminateMessage, strlen(terminateMessage), 0);
-
+	void sendTerminateMessage(SOCKET s) {
+		char terminateMessage[BUFSIZE] = "[Server] 서버가 종료되었습니다.";
+		for (int i = 0; i < clientCount; i++) {
+			if (clientInfo[i].connected == true) {
+				send(clientInfo[i].socket, terminateMessage, strlen(terminateMessage), 0);
+			}
 		}
 	}
-}
 ```
 - 서버 종료
 ```c
-void terminateServer(SOCKET s) {
-	printf("서버를 종료합니다.\n");
-	EnterCriticalSection(&cs);
-	sendTerminateMessage(s);
-	isThreadRunning = 0;
-	for (int i = 0; i < clientCount; i++) {
-		closesocket(clientInfo[i].socket);
+	void terminateServer(SOCKET s) {
+		printf("서버를 종료합니다.\n");
+		EnterCriticalSection(&cs);
+		sendTerminateMessage(s);
+		isThreadRunning = 0;
+		for (int i = 0; i < clientCount; i++) {
+			closesocket(clientInfo[i].socket);
+		}
+		LeaveCriticalSection(&cs);
+		closesocket(s);
+		DeleteCriticalSection(&cs);
+		WSACleanup();
 	}
-	LeaveCriticalSection(&cs);
-	closesocket(s);
-	DeleteCriticalSection(&cs);
-	WSACleanup();
-}
 ```
 
 ## Key Points
