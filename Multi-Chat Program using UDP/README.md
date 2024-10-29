@@ -20,6 +20,7 @@
      * 1분 당 평균 메시지 수에 대한 통계 데이터를 제공한다. 
   4. 채팅 종료
 ## Syntax
+### UDP Header
 ![image](https://github.com/user-attachments/assets/e8ea3931-5e3f-4c12-aad8-bfb8fcdd94dd)
 
 8 바이트 크기의 UDP 헤더는 Source Port, Destination Port, Length, 그리고 Checksum으로 이루어진다. 
@@ -28,6 +29,7 @@
 - Length: 전체 UDP 패킷의 길이를 나타낸다.
 - Checksum: 데이터의 무결성을 검증하기 위한 값이다.
 
+### UDP Data
 ![image](https://github.com/user-attachments/assets/75d76454-1ed9-4b98-9f09-457f36b7ca58)
 
 클라이언트는 메시지를 전송할 때, '[닉네임]메시지' 형식으로 메시지를 전송한다. 닉네임의 최대 크기는 20 바이트이고, 가변 길이의 문자열인 메시지를 포함하여 보낼 수 있는 데이터의 최대 크기는 512 바이트로 제한한다.
