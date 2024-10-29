@@ -22,6 +22,7 @@
      * 1분 당 평균 메시지 수에 대한 통계 데이터를 제공한다.
   3. 채팅 종료
 ## Syntax
+### TCP Header
 ![image](https://github.com/user-attachments/assets/06e73876-ce54-4b60-b4de-5f7567626cc7)
 
 -	Source port number: 데이터를 전송하는 컴퓨터의 포트 번호이다.
@@ -35,6 +36,7 @@
 -	Urgent pointer: 긴급 데이터가 있는 경우 이를 표시한다.
 -	Option: 추가 기능을 제공할 수 있는 확장 필드이다. 
 
+### TCP Data
 ![image](https://github.com/user-attachments/assets/25c9f9b3-2039-4565-9f94-4ae6b50bff24)
 
 클라이언트는 메시지를 전송할 때, ‘[닉네임]메시지’ 형식으로 메시지를 전송한다. 닉네임의 최대 크기는 20 바이트이고, 가변 길이의 문자열인 메시지를 포함하여 보낼 수 있는 데이터의 최대 크기는 512 바이트로 제한한다.
