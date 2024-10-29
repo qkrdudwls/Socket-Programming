@@ -4,3 +4,14 @@
 - **네트워크 라이브러리**: WinSock2
 ## Contents
 UDP 기반의 Stop-and-Wait ARQ가 적용된 클라이언트-서버 모델을 구현한다.
+
+## Syntax
+### UDP Header
+
+### UDP Data
+
+## Semantics
+
+## 주요 코드
+
+## Key Points
