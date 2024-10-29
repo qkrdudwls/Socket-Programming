@@ -35,7 +35,7 @@
 ```
 - 논블로킹 모드 설정
 ```c
-	u_long mode = 1; // 논블로킹 모드 설정
+	u_long mode = 1;
 	retval = ioctlsocket(s, FIONBIO, &mode);
 	if (retval != 0) {
 		fprintf(stderr, "ioctlsocket() failed\n");
@@ -127,7 +127,7 @@
 	if (retval == SOCKET_ERROR) {
 		error_code = WSAGetLastError();
 		if (error_code == WSAEINVAL || error_code == WSAEWOULDBLOCK) {
-			Sleep(100); // 100ms 대기
+			Sleep(100);
 			continue;
 		}
 		else {
