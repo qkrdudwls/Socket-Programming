@@ -22,8 +22,38 @@
      * 1분 당 평균 메시지 수에 대한 통계 데이터를 제공한다.
   3. 채팅 종료
 ## Syntax
+![image](https://github.com/user-attachments/assets/06e73876-ce54-4b60-b4de-5f7567626cc7)
 
+-	Source port number: 데이터를 전송하는 컴퓨터의 포트 번호이다.
+-	Destination port number: 데이터를 받는 컴퓨터의 포트 번호이다.
+-	Sequence number: 세그먼트의 순서를 정의하는 번호이다.
+-	Acknowledgement number: 수신된 데이터에 대해 송신자가 성공적으로 받았음을 알리는 응답 번호이다.
+-	Header length: TCP 헤더의 길이를 나타낸다.
+-	Flags: SYN, ACK, FIN등과 같이 여러 상태 정보를 나타내며, 데이터 전송의 다양한 과정을 제어한다.
+-	Window size: 수신 측이 한 번에 수신할 수 있는 데이터의 양을 나타낸다.
+-	Checksum: 오류 검출을 위한 필드이다.
+-	Urgent pointer: 긴급 데이터가 있는 경우 이를 표시한다.
+-	Option: 추가 기능을 제공할 수 있는 확장 필드이다. 
+
+![image](https://github.com/user-attachments/assets/25c9f9b3-2039-4565-9f94-4ae6b50bff24)
+
+클라이언트는 메시지를 전송할 때, ‘[닉네임]메시지’ 형식으로 메시지를 전송한다. 닉네임의 최대 크기는 20 바이트이고, 가변 길이의 문자열인 메시지를 포함하여 보낼 수 있는 데이터의 최대 크기는 512 바이트로 제한한다.
 ## Semantics
+클라이언트는 서버에 접속하기 위해 서버에 연결 요청을 보내면 서버는 3-way handshake를 시작한다. 클라이언트가 SYN 패킷을 보내면 서버는 SYN-ACK 패킷으로 응답한다. 이 패킷을 받은 클라이언트는 ACK 패킷을 서버로 보낸다. 
+
+![image](https://github.com/user-attachments/assets/f0ebf939-f530-472e-825f-daef50062d38)
+
+3-way handshake 과정이 끝난 후, 클라이언트가 서버로 메시지를 전송하면, 서버는 접속 중인 다른 클라이언트들에게 해당 메시지를 echo한다. 클라이언트가 서버에 메시지를 전송할 때, 클라이언트가 보낼 데이터는 세그먼트로 나뉘게 되고, 각 세그먼트에 순서 번호가 부여된다. 데이터 세그먼트를 전송할 때, 클라이언트는 세그먼트가 서버에 도착했는지 확인하기 위해 ACK을 요구한다. 서버는 받은 데이터 세그먼트의 순서 번호를 확인하고, 올바른 순서로 데이터를 재조합한 후, 클라이언트에게 데이터를 잘 받았다는 것을 알리기 위해 ACK 패킷을 보낸다. 
+
+![image](https://github.com/user-attachments/assets/ed413de5-b2d1-4146-a77e-1f1ed5cc7be1)
+
+그 후, 서버는 해당 메시지를 여러 세그먼트로 나누어 다른 클라이언트들에게 전송하고, 클라이언트가 데이터를 수신했는지 확인하기 위해 ACK 패킷을 기다린다. 클라이언트들은 서버가 보낸 데이터 세그먼트를 조합하여 원래의 메시지로 복원 후, 데이터를 잘 받았다는 것을 서버에게 알리기 위해 ACK 패킷을 서버로 전송한다. 
+
+![image](https://github.com/user-attachments/assets/91462795-7cc1-48c9-b576-bca3f2f35562)
+
+클라이언트가 quit 명령을 보내거나, 서버가 채팅 서버를 종료할 때 4-way handshake 과정이 일어난다. 연결을 종료하기 위해, 연결을 종료하려는 측은 TCP 헤더에 FIN 플래그를 설정하여 상대방에게 보낸다. 연결 종료 요청을 받은 측은 ACK 플래그를 설정한 패킷을 보내 연결 종료 요청을 확인하는데, 보내야 할 데이터를 모두 전송하고 나면 FIN 플래그를 설정해 다시 연결을 종료하겠다고 알린다. 마자막으로 연결 종료를 요청했던 측에서 ACK 패킷을 보냄으로써 연결을 완전히 종료한다.
+
+![image](https://github.com/user-attachments/assets/6a906ec0-1d2d-41b4-a102-b7602daa5d46)
 
 ## 주요 코드
 ### Client
