@@ -95,64 +95,64 @@
 ```
 - 메시지 생성 및 전송
 ```c
-		snprintf(totalMessage, sizeof(totalMessage), "[%s] ", nickname); 
-		memset(message, 0, BUFSIZE);
+	snprintf(totalMessage, sizeof(totalMessage), "[%s] ", nickname); 
+	memset(message, 0, BUFSIZE);
 
-		printf("메시지 입력 (종료 시 quit 입력) : ");
-		fgets(message, BUFSIZE, stdin);
-		msgLength = strlen(message);
-		if (message[msgLength - 1] == '\n') {
-			message[msgLength - 1] = '\0';
-		}
+	printf("메시지 입력 (종료 시 quit 입력) : ");
+	fgets(message, BUFSIZE, stdin);
+	msgLength = strlen(message);
+	if (message[msgLength - 1] == '\n') {
+		message[msgLength - 1] = '\0';
+	}
 
-		strncat(totalMessage, message, BUFSIZE - strlen(totalMessage) - 1);
+	strncat(totalMessage, message, BUFSIZE - strlen(totalMessage) - 1);
 ```
 ```c
-		retval = sendto(s, totalMessage, msgLength, 0, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
-		if (strcmp(message, "quit") == 0) {
-			break;
-		}
-		if (retval == SOCKET_ERROR) {
-			fprintf(stderr, "sendto() failed\n");
-			continue;
-		}
-		else {
-			printf("Send Message!\n");
-			printf("\n");
-		}
+	retval = sendto(s, totalMessage, msgLength, 0, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
+	if (strcmp(message, "quit") == 0) {
+		break;
+	}
+	if (retval == SOCKET_ERROR) {
+		fprintf(stderr, "sendto() failed\n");
+		continue;
+	}
+	else {
+		printf("Send Message!\n");
+		printf("\n");
+	}
 ```
 - 메시지 수신 및 서버 종료 메시지 처리
 ```c
-		retval = recvfrom(s, message, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
-		if (retval == SOCKET_ERROR) {
-			error_code = WSAGetLastError();
-			if (error_code == WSAEINVAL || error_code == WSAEWOULDBLOCK) {
-				Sleep(100); // 100ms 대기
-				continue;
-			}
-			else {
-				fprintf(stderr, "recvfrom() failed: %d\n", error_code);
-				break;
-			}
-			
+	retval = recvfrom(s, message, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
+	if (retval == SOCKET_ERROR) {
+		error_code = WSAGetLastError();
+		if (error_code == WSAEINVAL || error_code == WSAEWOULDBLOCK) {
+			Sleep(100); // 100ms 대기
+			continue;
 		}
 		else {
-			message[retval] = '\0';
-			printf("\nReceived Message : %s\n", message);
-			if (strcmp(message, "[SERVER]Server is terminated.") == 0) {
-				printf("서버가 종료되었습니다.\n");
-				exit(0);
-			}
+			fprintf(stderr, "recvfrom() failed: %d\n", error_code);
+			break;
 		}
+			
+	}
+	else {
+		message[retval] = '\0';
+		printf("\nReceived Message : %s\n", message);
+		if (strcmp(message, "[SERVER]Server is terminated.") == 0) {
+			printf("서버가 종료되었습니다.\n");
+			exit(0);
+		}
+	}
 ```
 ### Server
 - 클라이언트 정보 구조체
 ```c
-typedef struct {
-	char nickname[20]; 
-	SOCKADDR_IN clientIPAddr;
-	int port;
-}CLIENT;
+	typedef struct {
+		char nickname[20]; 
+		SOCKADDR_IN clientIPAddr;
+		int port;
+	}CLIENT;
 ```
 - 포트 번호 설정
 ```c
@@ -197,110 +197,109 @@ typedef struct {
 ```
 - 메시지 수신
 ```c
-		retval = recvfrom(s, receivedMessage, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
-		if (retval == SOCKET_ERROR) {
-			int error = WSAGetLastError();
-			if (error == WSAEWOULDBLOCK) {
-				Sleep(10);
-				continue;
-			}
-			else {
-				fprintf(stderr, "recvfrom() failed with error: %d\n", error);
-				break;
-			}
+	retval = recvfrom(s, receivedMessage, BUFSIZE, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
+	if (retval == SOCKET_ERROR) {
+		int error = WSAGetLastError();
+		if (error == WSAEWOULDBLOCK) {
+			Sleep(10);
+			continue;
 		}
+		else {
+			fprintf(stderr, "recvfrom() failed with error: %d\n", error);
+			break;
+		}
+	}
 ```
 - 클라이언트 정보 확인 및 저장
 ```c
-		int clientExist = 0;
-		for (int i = 0; i < clientCount; i++) {
-			if (memcmp(&clientInfo[i].clientIPAddr, &clientAddr, sizeof(SOCKADDR_IN)) == 0) {
-				clientExist = 1;
-				break;
-			}
+	int clientExist = 0;
+	for (int i = 0; i < clientCount; i++) {
+		if (memcmp(&clientInfo[i].clientIPAddr, &clientAddr, sizeof(SOCKADDR_IN)) == 0) {
+			clientExist = 1;
+			break;
 		}
-		if (clientExist == 0 && clientCount < MAX_CLIENT) {
-			parseNickname(receivedMessage, clientNickname);
-			strcpy(clientInfo[clientCount].nickname, clientNickname);
-			clientInfo[clientCount].clientIPAddr = clientAddr;
-			clientInfo[clientCount].port = ntohs(clientAddr.sin_port);
-			clientCount++;
-		}
-		else if (clientExist == 0 && clientCount >= MAX_CLIENT) {
-			printf("최대 접속 가능한 클라이언트 수를 초과했습니다.\n");
-		}
+	}
+	if (clientExist == 0 && clientCount < MAX_CLIENT) {
+		parseNickname(receivedMessage, clientNickname);
+		strcpy(clientInfo[clientCount].nickname, clientNickname);
+		clientInfo[clientCount].clientIPAddr = clientAddr;
+		clientInfo[clientCount].port = ntohs(clientAddr.sin_port);
+		clientCount++;
+	}
+	else if (clientExist == 0 && clientCount >= MAX_CLIENT) {
+		printf("최대 접속 가능한 클라이언트 수를 초과했습니다.\n");
+	}
 ```
 - 클라이언트 정보 삭제
 ```c
-			if (clientCount == 1) {
-				memset(&clientInfo[0], 0, sizeof(clientInfo));
-				clientCount = 0;
-			}
-			else {
-				for (int i = 0; i < clientCount; i++) {
-					if (memcmp(&clientInfo[i].clientIPAddr, &clientAddr, sizeof(SOCKADDR_IN)) == 0) {
-						if (i < clientCount - 1) {
-							strcpy(clientInfo[i].nickname, clientInfo[clientCount - 1].nickname);
-							clientInfo[i].clientIPAddr = clientInfo[clientCount - 1].clientIPAddr;
-							clientInfo[i].port = clientInfo[clientCount - 1].port;
-						}
-						clientCount--;
-						break;
-					}
-   }
+	if (clientCount == 1) {
+		memset(&clientInfo[0], 0, sizeof(clientInfo));
+		clientCount = 0;
+	}
+	else {
+		for (int i = 0; i < clientCount; i++) {
+			if (memcmp(&clientInfo[i].clientIPAddr, &clientAddr, sizeof(SOCKADDR_IN)) == 0) {
+				if (i < clientCount - 1) {
+					strcpy(clientInfo[i].nickname, clientInfo[clientCount - 1].nickname);
+					clientInfo[i].clientIPAddr = clientInfo[clientCount - 1].clientIPAddr;
+					clientInfo[i].port = clientInfo[clientCount - 1].port;
+				}
+			clientCount--;
+			break;
+		}
+	}
 ```
 - 닉네임 파싱
 ```c
-void parseNickname(char* receivedMessage, char* nickname) {
-	char* start = strchr(receivedMessage, '[');
-	char* end = strchr(receivedMessage, ']');
+	void parseNickname(char* receivedMessage, char* nickname) {
+		char* start = strchr(receivedMessage, '[');
+		char* end = strchr(receivedMessage, ']');
 
-	if (start != NULL && end != NULL && end > start) {
-		strncpy(nickname, start + 1, end - start - 1);
-		nickname[end - start - 1] = '\0';
-
+		if (start != NULL && end != NULL && end > start) {
+			strncpy(nickname, start + 1, end - start - 1);
+			nickname[end - start - 1] = '\0';
+		}
+		else {
+			strcpy(nickname, "Unknown");
+		}
 	}
-	else {
-		strcpy(nickname, "Unknown");
-	}
-}
 ```
 - 메시지 파싱
 ```c
-void parseMessage(char* receivedMessage, char* message) {
-	char* end = strchr(receivedMessage, ']');
+	void parseMessage(char* receivedMessage, char* message) {
+		char* end = strchr(receivedMessage, ']');
 
-	if (end != NULL) {
-		strcpy(message, end + 1);
-		message[BUFSIZE - (end - receivedMessage - 1)] = '\0';
+		if (end != NULL) {
+			strcpy(message, end + 1);
+			message[BUFSIZE - (end - receivedMessage - 1)] = '\0';
 
-		char* trimedMessage = message;
-		while (*trimedMessage == ' ') {
-			trimedMessage++;
+			char* trimedMessage = message;
+			while (*trimedMessage == ' ') {
+				trimedMessage++;
+			}
+			strcpy(message, trimedMessage);
 		}
-		strcpy(message, trimedMessage);
+		else {
+			strcpy(message, receivedMessage);
+		}
 	}
-	else {
-		strcpy(message, receivedMessage);
-	}
-}
 ```
 - 채팅 서버 종료 메시지 전송
 ```c
-void sendTerminateMessage(SOCKET s) {
-	int retval;
+	void sendTerminateMessage(SOCKET s) {
+		int retval;
 
-	SOCKADDR_IN clientAddr;
-	int clientAddrLength = sizeof(clientAddr);
-	char terminateMessage[BUFSIZE] = "[SERVER]Server is terminated.";
+		SOCKADDR_IN clientAddr;
+		int clientAddrLength = sizeof(clientAddr);
+		char terminateMessage[BUFSIZE] = "[SERVER]Server is terminated.";
 
-	for (int i = 0; i < clientCount; i++) {
-		retval = sendto(s, terminateMessage, strlen(terminateMessage), 0, (SOCKADDR*)&clientInfo[i].clientIPAddr, sizeof(SOCKADDR_IN));
-		if (retval == SOCKET_ERROR) {
-			fprintf(stderr, "sendto() failed\n");
-			continue;
+		for (int i = 0; i < clientCount; i++) {
+			retval = sendto(s, terminateMessage, strlen(terminateMessage), 0, (SOCKADDR*)&clientInfo[i].clientIPAddr, sizeof(SOCKADDR_IN));
+			if (retval == SOCKET_ERROR) {
+				fprintf(stderr, "sendto() failed\n");
+				continue;
+			}
 		}
 	}
-}
 ```
   
