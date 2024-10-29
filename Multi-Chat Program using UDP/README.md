@@ -20,8 +20,29 @@
      * 1분 당 평균 메시지 수에 대한 통계 데이터를 제공한다. 
   4. 채팅 종료
 ## Syntax
+![image](https://github.com/user-attachments/assets/e8ea3931-5e3f-4c12-aad8-bfb8fcdd94dd)
 
+8 바이트 크기의 UDP 헤더는 Source Port, Destination Port, Length, 그리고 Checksum으로 이루어진다. 
+- Source Port: 송신자의 포트 번호이다.
+- Destination Port: 수신자의 포트 번호로, 외부 입력으로 결정된다.
+- Length: 전체 UDP 패킷의 길이를 나타낸다.
+- Checksum: 데이터의 무결성을 검증하기 위한 값이다.
+
+![image](https://github.com/user-attachments/assets/75d76454-1ed9-4b98-9f09-457f36b7ca58)
+
+클라이언트는 메시지를 전송할 때, '[닉네임]메시지' 형식으로 메시지를 전송한다. 닉네임의 최대 크기는 20 바이트이고, 가변 길이의 문자열인 메시지를 포함하여 보낼 수 있는 데이터의 최대 크기는 512 바이트로 제한한다.
 ## Semantics
+클라이언트가 접속하면 서버에 닉네임이 담긴 패킷을 전송함으로써 본인이 접속했음을 서버에게 알린다.
+
+![image](https://github.com/user-attachments/assets/26e90322-f1a3-4fbd-8b6f-0a3c4a147eb1)
+
+서버가 클라이언트로부터 메시지를 수신하면, 서버는 해당 메시지를 전송한 클라이언트를 제외한 나머지 클라이언트들에게 메시지를 echo한다.
+
+![image](https://github.com/user-attachments/assets/ed57816d-3d6a-48a3-a999-3b904a281f98)
+
+채팅 서버 종료 시, 서버는 모든 클라이언트들에게 서버가 종료되었음을 알린다. 해당 메시지를 수신한 클라이언트의 프로그램은 종료된다. 
+
+![image](https://github.com/user-attachments/assets/d92c09af-335a-4888-bef6-bf1bb23a40b1)
 
 ## 주요 코드
 ### Client
