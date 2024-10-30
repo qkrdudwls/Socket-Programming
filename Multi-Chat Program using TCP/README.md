@@ -391,3 +391,8 @@ Transmission Control Protocol(TCP)을 사용하여 여러 클라이언트 간의
 ```
 
 ## Key Points
+#### Thread
+
+#### Non-blocking mode
+
+#### select()
