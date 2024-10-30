@@ -8,5 +8,5 @@
 ## [3. Multi-Chat Program using TCP](https://github.com/qkrdudwls/Network-Software/tree/main/Multi-Chat%20Program%20using%20TCP)
 * TCP 소켓을 사용한 N:1 클라이언트 서버 모델.
 ## [4. UDP-based ARQ Programming](https://github.com/qkrdudwls/Network-Software/tree/main/UDP-based%20ARQ%20Programming)
-* UDP 소켓을 사용한 Stop-and-Wait ARQ 클라이언트-서버 모델.
+* UDP 소켓 기반의 Stop-and-Wait ARQ를 적용한 클라이언트-서버 모델.
 
