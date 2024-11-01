@@ -43,8 +43,8 @@ UDP 데이터는 2 바이트 크기의 sequence number와 가변 길이의 문�
 ### Client
 - 제한 시간 설정
 ```c
-  #define TIMEOUT 1 // Random Input
-  #define TIMEOUT 10 // Keyboard Input
+	#define TIMEOUT 1 // Random Input
+	#define TIMEOUT 10 // Keyboard Input
 ```
 - 소켓 생성
 ```c
@@ -78,110 +78,109 @@ UDP 데이터는 2 바이트 크기의 sequence number와 가변 길이의 문�
 ```
 - 난수 생성 및 랜덤 메시지 생성 (난수 범위: 1 ~ BUFSIZE) (Random Input)
 ```c
-  randNum = rand() % BUFSIZE + 1;
+	randNum = rand() % BUFSIZE + 1;
 
-  for (int i = 0; i < randNum; i++) {
-  message[i] = 'A' + rand() % 26;
-  }
+	for (int i = 0; i < randNum; i++) {
+	message[i] = 'A' + rand() % 26;
+	}
 ```
 - 메시지 입력 (Keyboard Input)
 ```c
-		fprintf(stdout, "[%d] Input Message (종료 시 quit 또는 QUIT 입력) : ", K);
-		fgets(message, BUFSIZE + 1, stdin);
-		messageLength = strlen(message);
-		if (message[messageLength - 1] == '\n') {
-			message[messageLength - 1] = '\0';
-		}
+	fprintf(stdout, "[%d] Input Message (종료 시 quit 또는 QUIT 입력) : ", K);
+	fgets(message, BUFSIZE + 1, stdin);
+	messageLength = strlen(message);
+	if (message[messageLength - 1] == '\n') {
+		message[messageLength - 1] = '\0';
+	}
 ```
 - 메시지 전송
 ```c
-			retval = sendto(s, totalMessage, totalLength, 0, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
-			if (retval == SOCKET_ERROR) {
-				fprintf(stderr, "sendto() failed\n");
-				exit(1);
-			}
-			else {
-				fprintf(stdout, "[%d] Send Message: %s\n\n", K, message);
-			}
+	retval = sendto(s, totalMessage, totalLength, 0, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
+	if (retval == SOCKET_ERROR) {
+		fprintf(stderr, "sendto() failed\n");
+		exit(1);
+	}
+	else {
+		fprintf(stdout, "[%d] Send Message: %s\n\n", K, message);
+	}
 ```
 - 타임아웃 설정
 ```c
-			fd_set readfds;
-			FD_ZERO(&readfds);
-			FD_SET(s, &readfds);
+	fd_set readfds;
+	FD_ZERO(&readfds);
+	FD_SET(s, &readfds);
 
-			timeout.tv_sec = TIMEOUT;
-			timeout.tv_usec = 0;
+	timeout.tv_sec = TIMEOUT;
+	timeout.tv_usec = 0;
 ```
 - select()
 ```c
-			retval = select(0, &readfds, NULL, NULL, &timeout);
-			if (retval == SOCKET_ERROR) {
-				fprintf(stderr, "select() failed\n");
-				exit(1);
-			}
+	retval = select(0, &readfds, NULL, NULL, &timeout);
+	if (retval == SOCKET_ERROR) {
+		fprintf(stderr, "select() failed\n");
+		exit(1);
+	}
 ```
 - 메시지 수신
 ```c
-retval = recvfrom(s, totalMessage, totalLength, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
-				if (retval == SOCKET_ERROR) {
-					fprintf(stderr, "recvfrom() failed\n");
-					exit(1);
-				}
-				else {
-					memcpy(&ackNum, totalMessage, 2);
-					if (ackNum == seqNum) {
+	retval = recvfrom(s, totalMessage, totalLength, 0, (SOCKADDR*)&clientAddr, &clientAddrLength);
+	if (retval == SOCKET_ERROR) {
+		fprintf(stderr, "recvfrom() failed\n");
+		exit(1);
+	}
+	else {
+		memcpy(&ackNum, totalMessage, 2);
+		if (ackNum == seqNum) {
 
-						fprintf(stdout, "Received Message: %s\n\n", totalMessage + 2);
-						sequence += randNum; // seqNum 증가
-						ackReceived = true;
-					}
-					
-					else {
-						fprintf(stdout, "Packet loss. Resending Message...\n\n");
-					}
-				}
+			fprintf(stdout, "Received Message: %s\n\n", totalMessage + 2);
+			sequence += randNum; // seqNum 증가
+			ackReceived = true;
+		}
+		else {
+			fprintf(stdout, "Packet loss. Resending Message...\n\n");
+		}
+	}
 ```
 - 타임 아웃 발생 시 메시지 재전송
 ```c
-else if (retval == 0) {
-				fprintf(stderr, "Timeout. Resending Message...\n\n");
-				continue;
-			}
+	else if (retval == 0) {
+		fprintf(stderr, "Timeout. Resending Message...\n\n");
+		continue;
+	}
 ```
 - 종료 메시지 전송 (Random Input)
 ```c
-strcpy(message, "quit");
+	strcpy(message, "quit");
 
-			memcpy(totalMessage + 2, message, 4);
-			totalLength = 6;
+	memcpy(totalMessage + 2, message, 4);
+	totalLength = 6;
 ```
 ### Server
 - 소켓 생성
 ```c
-    SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
-    if (s == INVALID_SOCKET) {
-        fprintf(stderr, "socket() failed\n");
-        exit(1);
-    }
+	SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
+	if (s == INVALID_SOCKET) {
+		fprintf(stderr, "socket() failed\n");
+        	exit(1);
+    	}
 ```
 - 소켓 주소 구조체 초기화 및 바인딩
 ```c
-    SOCKADDR_IN serverAddr;
-    ZeroMemory(&serverAddr, sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serverAddr.sin_port = htons(PORT);
-    retval = bind(s, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
-    if (retval == SOCKET_ERROR) {
-        fprintf(stderr, "bind() failed\n");
-        exit(1);
-    }
+	SOCKADDR_IN serverAddr;
+	ZeroMemory(&serverAddr, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    	serverAddr.sin_port = htons(PORT);
+    	retval = bind(s, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
+    	if (retval == SOCKET_ERROR) {
+        	fprintf(stderr, "bind() failed\n");
+        	exit(1);
+    	}
 ```
 - p값 설정
 ```c
-    fprintf(stdout, "0과 1 사이의 확률값 입력 (default= 0.5): ");
-    fscanf(stdin, "%lf", &p);
+    	fprintf(stdout, "0과 1 사이의 확률값 입력 (default= 0.5): ");
+    	fscanf(stdin, "%lf", &p);
 ```
 - 메시지 수신
 ```c
@@ -193,22 +192,22 @@ strcpy(message, "quit");
 ```
 - 확률값 생성
 ```c
-     random = (double)rand() / max;
+	random = (double)rand() / max;
 ```
 - 메시지 echo 처리
 ```c
-            retval = sendto(s, message, strlen(message), 0, (SOCKADDR*)&clientAddr, sizeof(clientAddr));
-            if (retval == SOCKET_ERROR) {
-                fprintf(stderr, "sendto() failed\n");
+	retval = sendto(s, message, strlen(message), 0, (SOCKADDR*)&clientAddr, sizeof(clientAddr));
+	if (retval == SOCKET_ERROR) {
+		fprintf(stderr, "sendto() failed\n");
                 exit(1);
-            }
+	}
 
-  messageCount++;
+	messageCount++;
 ```
 - 메시지 손실 처리
 ```c
-            fprintf(stdout, "메시지 손실 처리\n\n");
-            retransmissionCount++;
+	fprintf(stdout, "메시지 손실 처리\n\n");
+	retransmissionCount++;
 ```
 
 ## Key Points
