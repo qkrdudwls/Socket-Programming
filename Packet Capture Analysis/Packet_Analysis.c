@@ -1,11 +1,3 @@
-//
-// Packet Capture Example: Analysis of Captured Data
-//
-// Network Software Design
-// Department of Software and Computer Engineering, Ajou University
-// by Byeong-hee Roh
-//
-
 #define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable:4996)
 #pragma comment("wpcap.lib")
@@ -19,51 +11,51 @@
 
 // litereals realted to distinguishing protocols
 #define ETHERTYPE_IP		0x0800
-#define ETH_II_HSIZE		14		// EthernetII Çì´õ Å©±â
-#define IP_HSIZE			20		// IP Çì´õ Å©±â (¿É¼Ç ¾øÀ½)
+#define ETH_II_HSIZE		14		// EthernetII í—¤ë” í¬ê¸°
+#define IP_HSIZE			20		// IP í—¤ë” í¬ê¸° (ì˜µì…˜ ì—†ìŒ)
 #define IP_PROTO_TCP		6		// TCP
 #define IP_PROTO_UDP		17		// UDP
 
 /* etherent header */
 struct ethernet_header {
-	uint8_t dest_mac[6];   // ¸ñÀûÁö MAC ÁÖ¼Ò
-	uint8_t src_mac[6];    // ¼Ò½º MAC ÁÖ¼Ò
-	uint16_t eth_type;     // Ethernet Å¸ÀÔ
+	uint8_t dest_mac[6];   // ëª©ì ì§€ MAC ì£¼ì†Œ
+	uint8_t src_mac[6];    // ì†ŒìŠ¤ MAC ì£¼ì†Œ
+	uint16_t eth_type;     // Ethernet íƒ€ì…
 };
 
 // IPv4 Header
 struct ip_header {
-	uint8_t  ihl : 4;      // IP Çì´õ ±æÀÌ
-	uint8_t  version : 4;  // IP ¹öÀü
-	uint8_t  tos;          // ¼­ºñ½º Å¸ÀÔ
-	uint16_t tot_len;      // ÀüÃ¼ ±æÀÌ
-	uint16_t id;           // ½Äº°ÀÚ
-	uint16_t frag_off;     // ÇÃ·¡±× + ¿ÀÇÁ¼Â
+	uint8_t  ihl : 4;      // IP í—¤ë” ê¸¸ì´
+	uint8_t  version : 4;  // IP ë²„ì „
+	uint8_t  tos;          // ì„œë¹„ìŠ¤ íƒ€ì…
+	uint16_t tot_len;      // ì „ì²´ ê¸¸ì´
+	uint16_t id;           // ì‹ë³„ì
+	uint16_t frag_off;     // í”Œë˜ê·¸ + ì˜¤í”„ì…‹
 	uint8_t  ttl;          // TTL
-	uint8_t  protocol;     // ÇÁ·ÎÅäÄİ (TCP, UDP µî)
-	uint16_t checksum;     // Ã¼Å©¼¶
-	uint32_t saddr;        // ¼Ò½º IP ÁÖ¼Ò
-	uint32_t daddr;        // ¸ñÀûÁö IP ÁÖ¼Ò
+	uint8_t  protocol;     // í”„ë¡œí† ì½œ (TCP, UDP ë“±)
+	uint16_t checksum;     // ì²´í¬ì„¬
+	uint32_t saddr;        // ì†ŒìŠ¤ IP ì£¼ì†Œ
+	uint32_t daddr;        // ëª©ì ì§€ IP ì£¼ì†Œ
 };
 
 // TCP Header
 struct tcp_header {
-	uint16_t src_port;       // ¼Ò½º Æ÷Æ® ¹øÈ£
-	uint16_t dst_port;       // ¸ñÀûÁö Æ÷Æ® ¹øÈ£
-	uint32_t seq_num;        // ½ÃÄö½º ¹øÈ£
-	uint32_t ack_num;        // ÀÀ´ä ¹øÈ£
-	uint16_t hlen_flags;     // Çì´õ±æÀÌ (4ºñÆ®) + Unused (6ºñÆ®) + ÇÃ·¡±×(6ºñÆ®)
-	uint16_t window;         // À©µµ¿ì Å©±â
-	uint16_t checksum;       // Ã¼Å©¼¶
-	uint16_t urg_ptr;        // ±ä±ŞÆ÷ÀÎÅÍ
+	uint16_t src_port;       // ì†ŒìŠ¤ í¬íŠ¸ ë²ˆí˜¸
+	uint16_t dst_port;       // ëª©ì ì§€ í¬íŠ¸ ë²ˆí˜¸
+	uint32_t seq_num;        // ì‹œí€€ìŠ¤ ë²ˆí˜¸
+	uint32_t ack_num;        // ì‘ë‹µ ë²ˆí˜¸
+	uint16_t hlen_flags;     // í—¤ë”ê¸¸ì´ (4ë¹„íŠ¸) + Unused (6ë¹„íŠ¸) + í”Œë˜ê·¸(6ë¹„íŠ¸)
+	uint16_t window;         // ìœˆë„ìš° í¬ê¸°
+	uint16_t checksum;       // ì²´í¬ì„¬
+	uint16_t urg_ptr;        // ê¸´ê¸‰í¬ì¸í„°
 };
 
 // UDP Header
 struct udp_header {
-	uint16_t src_port;       // ¼Ò½º Æ÷Æ® ¹øÈ£
-	uint16_t dst_port;       // ¸ñÀûÁö Æ÷Æ® ¹øÈ£
-	uint16_t length;         // UDP µ¥ÀÌÅÍ±×·¥ Å©±â
-	uint16_t checksum;       // Ã¼Å©¼¶
+	uint16_t src_port;       // ì†ŒìŠ¤ í¬íŠ¸ ë²ˆí˜¸
+	uint16_t dst_port;       // ëª©ì ì§€ í¬íŠ¸ ë²ˆí˜¸
+	uint16_t length;         // UDP ë°ì´í„°ê·¸ë¨ í¬ê¸°
+	uint16_t checksum;       // ì²´í¬ì„¬
 };
 
 struct ethernet_header	eth_hdr;
@@ -88,7 +80,7 @@ int parse_ip_header(unsigned char* data, struct ip_header* ip_hdr)
 	ip_hdr->version = data[0] >> 4;		// IP version
 	ip_hdr->ihl = data[0] & 0x0f;	// IP header length
 	ip_hdr->protocol = data[9];		    // protocol above IP
-	// ½Ç½À: ¿©±â¿¡ ´Ù¸¥ IP Çì´õ ÇÊµå Á¤º¸ Ãß°¡
+	// ì‹¤ìŠµ: ì—¬ê¸°ì— ë‹¤ë¥¸ IP í—¤ë” í•„ë“œ ì •ë³´ ì¶”ê°€
 	ip_hdr->tot_len = pntoh16(&data[2]);
 	ip_hdr->id = pntoh16(&data[4]);
 	ip_hdr->frag_off = pntoh16(&data[6]);
@@ -201,49 +193,49 @@ void print_header_details(struct ethernet_header* eth_hdr, struct ip_header* ip_
 
 void main(int argc, char** argv)
 {
-	struct pcap_file_header	pcap_global_hdr;		// PCAP ±Û·Î¹ú Çì´õ
-	struct pcap_pkthdr 		pcap_pk_hdr;			// PCAP ÆĞÅ¶ Çì´õ
-	unsigned char			pcap_pk_data[2000];		// PCAP ÆĞÅ¶ µ¥ÀÌÅÍ
+	struct pcap_file_header	pcap_global_hdr;		// PCAP ê¸€ë¡œë²Œ í—¤ë”
+	struct pcap_pkthdr 		pcap_pk_hdr;			// PCAP íŒ¨í‚· í—¤ë”
+	unsigned char			pcap_pk_data[2000];		// PCAP íŒ¨í‚· ë°ì´í„°
 	FILE* fin;
 	int						pk_no, res, offset = 0;
-	double					init_time, curr_time;	// Ã¹¹øÂ° ÆĞÅ¶ Ä¸ÃÄ ½Ã°£, ÇöÀç ÆĞÅ¶ Ä¸ÃÄ ½Ã°£
+	double					init_time, curr_time;	// ì²«ë²ˆì§¸ íŒ¨í‚· ìº¡ì³ ì‹œê°„, í˜„ì¬ íŒ¨í‚· ìº¡ì³ ì‹œê°„
 	unsigned long			net_ip_count = 0, net_etc_count = 0;
 	unsigned long			trans_tcp_count = 0, trans_udp_count = 0, trans_etc_count = 0;
 
-	// PCAP ÆÄÀÏ ¿­±â
+	// PCAP íŒŒì¼ ì—´ê¸°
 	fin = fopen("ccc.pcap", "rb");
 	if (fin == NULL) {
 		perror("Error opening file");
 		exit(EXIT_FAILURE);
 	}
-	// ±Û·Î¹ú Çì´õ ÀĞ±â
+	// ê¸€ë¡œë²Œ í—¤ë” ì½ê¸°
 	fread((char*)&pcap_global_hdr, sizeof(pcap_global_hdr), 1, fin);
 	if (pcap_global_hdr.magic != 0xA1B2C3D4) {
-		printf("ÆÄÀÏ ¿À·ù: Áö¿øµÇÁö ¾Ê´Â PCAP ÆÄÀÏ Çü½Ä (0x%x)\n", pcap_global_hdr.magic);
+		printf("íŒŒì¼ ì˜¤ë¥˜: ì§€ì›ë˜ì§€ ì•ŠëŠ” PCAP íŒŒì¼ í˜•ì‹ (0x%x)\n", pcap_global_hdr.magic);
 		exit(0);
 	}
 
 	pk_no = 0;
 	while (1) {
 
-		// ÆĞÅ¶ Çì´õ ÀĞ±â
+		// íŒ¨í‚· í—¤ë” ì½ê¸°
 		if (fread((char*)&pcap_pk_hdr, sizeof(pcap_pk_hdr), 1, fin) == 0)
 			break;
 
-		// Ä¸ÃÄÇÑ ½Ã°£ ±¸ÇÏ±â
+		// ìº¡ì³í•œ ì‹œê°„ êµ¬í•˜ê¸°
 		curr_time = pcap_pk_hdr.ts.tv_sec + pcap_pk_hdr.ts.tv_usec * 0.000001;
 		if (pk_no == 0)
 			init_time = curr_time;
 
-		// ÆĞÅ¶ Çì´õ¿¡ ÁöÁ¤µÈ Å©±â (caplen)ÀÇ Ä¸ÃÄµÈ µ¥ÀÌÅÍ ÀĞ±â
+		// íŒ¨í‚· í—¤ë”ì— ì§€ì •ëœ í¬ê¸° (caplen)ì˜ ìº¡ì³ëœ ë°ì´í„° ì½ê¸°
 		fread(pcap_pk_data, sizeof(unsigned char), pcap_pk_hdr.caplen, fin);
 
-		// ÀÌ´õ³İ ÇÁ·¹ÀÓ Çì´õ ºĞ¼®
+		// ì´ë”ë„· í”„ë ˆì„ í—¤ë” ë¶„ì„
 		offset = 0;
 		res = parse_ethernet_header(&pcap_pk_data[offset], &eth_hdr);
 
 		if (eth_hdr.eth_type == ETHERTYPE_IP) {
-			// IP Çì´õ ºĞ¼®
+			// IP í—¤ë” ë¶„ì„
 			offset += ETH_II_HSIZE;
 			res = parse_ip_header(&pcap_pk_data[offset], &ip_hdr);
 			net_ip_count++;
