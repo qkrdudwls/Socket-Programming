@@ -12,7 +12,6 @@
 #pragma warning(disable:4996)
 #pragma comment(lib, "ws2_32.lib")
 
-// 클라이언트 정보 구조체
 typedef struct {
 	char nickname[20]; // 닉네임
 	SOCKET socket; // 소켓
@@ -22,13 +21,12 @@ typedef struct {
 	bool saveInfo; // 닉네임 정보 저장 여부
 }CLIENT;
 
-CLIENT clientInfo[MAX_CLIENTS]; // 클라이언트 정보 구조체 배열
-CRITICAL_SECTION cs; // 임계 영역
-int clientCount; // 클라이언트 수
-int messageCount = 0; // 메시지 수
-int isThreadRunning = 1; // 스레드 실행 여부
+CLIENT clientInfo[MAX_CLIENTS]; 
+CRITICAL_SECTION cs; 
+int clientCount;
+int messageCount = 0; 
+int isThreadRunning = 1; 
 
-// 닉네임 파싱
 void parseNickname(char* receivedMessage, char* nickname) {
 	char* start = strchr(receivedMessage, '[');
 	char* end = strchr(receivedMessage, ']');
@@ -73,10 +71,9 @@ DWORD WINAPI echoThread(LPVOID arg) {
 	SOCKET clientSocket;
 	SOCKADDR_IN clientAddr;
 	int clientAddrLength = 0;
-	char receivedMessage[BUFSIZE] = ""; // 수신 메시지
-	char nickname[20] = ""; // 닉네임
-	char message[BUFSIZE] = ""; // 메시지
-
+	char receivedMessage[BUFSIZE] = ""; 
+	char nickname[20] = "";
+	char message[BUFSIZE] = ""; 
 
 	while (isThreadRunning) {
 		FD_ZERO(&readfds);
@@ -93,12 +90,10 @@ DWORD WINAPI echoThread(LPVOID arg) {
 		}
 		LeaveCriticalSection(&cs);
 
-		// select() 함수를 이용하여 소켓의 상태 변화를 감지
 		select(maxSocket + 1, &readfds, NULL, NULL, NULL);
 
 		if (FD_ISSET(listenSocket, &readfds)) {
 			clientAddrLength = sizeof(clientAddr);
-			// 클라이언트의 접속 요청을 수락
 			clientSocket = accept(listenSocket, (SOCKADDR*)&clientAddr, &clientAddrLength);
 			if (clientSocket == INVALID_SOCKET) {
 				if (isThreadRunning != 1) {
@@ -108,14 +103,13 @@ DWORD WINAPI echoThread(LPVOID arg) {
 				continue;
 			}
 
-			// 클라이언트 정보 저장
 			EnterCriticalSection(&cs);
 			if (clientCount < MAX_CLIENTS) {
 				clientInfo[clientCount].socket = clientSocket;
 				clientInfo[clientCount].clientIPAddr = clientAddr;
 				clientInfo[clientCount].port = ntohs(clientAddr.sin_port);
-				clientInfo[clientCount].connected = true; // 연결 상태 변경
-				clientInfo[clientCount].saveInfo = false; // 닉네임 정보 저장 여부 초기화
+				clientInfo[clientCount].connected = true; 
+				clientInfo[clientCount].saveInfo = false; 
 				clientCount++;
 			}
 			else {
@@ -125,56 +119,46 @@ DWORD WINAPI echoThread(LPVOID arg) {
 			LeaveCriticalSection(&cs);
 		}
 
-		// 클라이언트로부터 메시지를 수신하고 다른 클라이언트에게 전송
 		for (int i = 0; i < clientCount; i++) {
 			if (FD_ISSET(clientInfo[i].socket, &readfds)) {
-				// 메시지 초기화
 				memset(receivedMessage, 0, sizeof(receivedMessage));
 				memset(message, 0, sizeof(message));
 
-				// 클라이언트로부터 메시지 수신
 				retval = recv(clientInfo[i].socket, receivedMessage, BUFSIZE, 0);
 
 				if (clientInfo[i].saveInfo == false) {
-					// 클라이언트의 닉네임 파싱
 					nickname[0] = '\0';
 					parseNickname(receivedMessage, nickname);
 
-					strcpy(clientInfo[i].nickname, nickname); // 닉네임 정보 저장
-					clientInfo[i].saveInfo = true; // 닉네임 정보 저장 여부 변경
-					continue; // 닉네임 정보 저장용 메시지는 다른 클라이언트들에게 전송하지 않음 
+					strcpy(clientInfo[i].nickname, nickname); 
+					clientInfo[i].saveInfo = true; 
+					continue; 
 				}
 
-				// 클라이언트의 메시지 파싱
 				parseMessage(receivedMessage, message);
-				// 클라이언트의 연결 종료 여부 확인
 				if (strcmp(message, "quit") == 0 || retval == SOCKET_ERROR || retval == 0) {
-					// 클라이언트 소켓을 닫기 전 FD_SET에서 제거
 					FD_CLR(clientInfo[i].socket, &readfds);
 					closesocket(clientInfo[i].socket);
 
 					EnterCriticalSection(&cs);
-					clientInfo[i].connected = false; // 연결 상태 변경
+					clientInfo[i].connected = false; 
 					LeaveCriticalSection(&cs);
 
-					// maxSocket 재설정
 					maxSocket = listenSocket;
 					for (int j = 0; j < clientCount; j++) {
 						if (clientInfo[j].connected == true && clientInfo[j].socket > maxSocket) {
-							maxSocket = clientInfo[j].socket; // maxSocket 갱신
+							maxSocket = clientInfo[j].socket;
 						}
 					}
 					continue;
 				}
 
 				else {
-					// 메시지 수 증가
 					EnterCriticalSection(&cs);
 					messageCount++;
 					LeaveCriticalSection(&cs);
 
 					for (int j = 0; j < clientCount; j++) {
-						// 접속 중인 다른 클라이언트에게 메시지 전송
 						if (i != j && clientInfo[j].connected == true) {
 							retval = send(clientInfo[j].socket, receivedMessage, strlen(receivedMessage), 0);
 							if (retval == SOCKET_ERROR) {
@@ -190,7 +174,6 @@ DWORD WINAPI echoThread(LPVOID arg) {
 	return 0;
 }
 
-// 명령 메뉴 출력
 void printCommandMenu() {
 	printf("=========================================\n");
 	printf("=================Command=================\n");
@@ -201,7 +184,6 @@ void printCommandMenu() {
 	printf("Input Command (숫자로 입력): ");
 }
 
-// 클라이언트 정보 출력
 void printClientInfo() {
 	EnterCriticalSection(&cs);
 	printf("=========================================\n");
@@ -214,7 +196,6 @@ void printClientInfo() {
 	LeaveCriticalSection(&cs);
 }
 
-// 메시지 통계 출력
 void printMessageStat(time_t startTime) {
 	EnterCriticalSection(&cs);
 	time_t currentTime = time(NULL);
@@ -231,7 +212,6 @@ void printMessageStat(time_t startTime) {
 	LeaveCriticalSection(&cs);
 }
 
-// 접속 중인 클라이언트들에게 서버 종료 메시지 전송
 void sendTerminateMessage(SOCKET s) {
 	char terminateMessage[BUFSIZE] = "[Server] 서버가 종료되었습니다.";
 	for (int i = 0; i < clientCount; i++) {
@@ -242,7 +222,6 @@ void sendTerminateMessage(SOCKET s) {
 	}
 }
 
-// 서버 종료
 void terminateServer(SOCKET s) {
 	printf("서버를 종료합니다.\n");
 	EnterCriticalSection(&cs);
@@ -260,20 +239,17 @@ void terminateServer(SOCKET s) {
 int main(int argc, char* argv[]) {
 	int retval;
 
-	// Winsock 초기화
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
 		fprintf(stderr, "WSAStartup() failed\n");
 		return 1;
 	}
 
-	// 서버 포트 입력
 	int PORT = 0;
 	printf("Input Server Port: ");
 	fscanf(stdin, "%d", &PORT);
 	getchar();
 
-	// 소켓 생성 및 바인딩
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenSocket == INVALID_SOCKET) {
 		fprintf(stderr, "socket() failed\n");
@@ -289,7 +265,6 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	// 클라이언트 접속 대기
 	retval = listen(listenSocket, SOMAXCONN);
 	if (retval == SOCKET_ERROR) {
 		fprintf(stderr, "listen() failed\n");
@@ -297,7 +272,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	InitializeCriticalSection(&cs);
-	// Echo 스레드 생성
 	HANDLE hThread = CreateThread(NULL, 0, echoThread, (LPVOID)&listenSocket, 0, NULL);
 	if (hThread == NULL) {
 		fprintf(stderr, "CreateThread() failed\n");
