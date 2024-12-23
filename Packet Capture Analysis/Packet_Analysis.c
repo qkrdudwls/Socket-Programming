@@ -9,53 +9,49 @@
 
 #define LINE_LEN 16
 
-// litereals realted to distinguishing protocols
 #define ETHERTYPE_IP		0x0800
-#define ETH_II_HSIZE		14		// EthernetII 헤더 크기
-#define IP_HSIZE			20		// IP 헤더 크기 (옵션 없음)
-#define IP_PROTO_TCP		6		// TCP
-#define IP_PROTO_UDP		17		// UDP
+#define ETH_II_HSIZE		14		
+#define IP_HSIZE		20		
+#define IP_PROTO_TCP		6		
+#define IP_PROTO_UDP		17		
 
-/* etherent header */
 struct ethernet_header {
-	uint8_t dest_mac[6];   // 목적지 MAC 주소
-	uint8_t src_mac[6];    // 소스 MAC 주소
-	uint16_t eth_type;     // Ethernet 타입
+	uint8_t dest_mac[6];   
+	uint8_t src_mac[6];   
+	uint16_t eth_type;     
 };
 
 // IPv4 Header
 struct ip_header {
-	uint8_t  ihl : 4;      // IP 헤더 길이
-	uint8_t  version : 4;  // IP 버전
-	uint8_t  tos;          // 서비스 타입
-	uint16_t tot_len;      // 전체 길이
-	uint16_t id;           // 식별자
-	uint16_t frag_off;     // 플래그 + 오프셋
-	uint8_t  ttl;          // TTL
-	uint8_t  protocol;     // 프로토콜 (TCP, UDP 등)
-	uint16_t checksum;     // 체크섬
-	uint32_t saddr;        // 소스 IP 주소
-	uint32_t daddr;        // 목적지 IP 주소
+	uint8_t  ihl : 4;      
+	uint8_t  version : 4;  
+	uint8_t  tos;         
+	uint16_t tot_len;      
+	uint16_t id;           
+	uint16_t frag_off;     
+	uint8_t  ttl;          
+	uint8_t  protocol;     
+	uint16_t checksum;     
+	uint32_t saddr;       
+	uint32_t daddr;        
 };
 
-// TCP Header
 struct tcp_header {
-	uint16_t src_port;       // 소스 포트 번호
-	uint16_t dst_port;       // 목적지 포트 번호
-	uint32_t seq_num;        // 시퀀스 번호
-	uint32_t ack_num;        // 응답 번호
-	uint16_t hlen_flags;     // 헤더길이 (4비트) + Unused (6비트) + 플래그(6비트)
-	uint16_t window;         // 윈도우 크기
-	uint16_t checksum;       // 체크섬
-	uint16_t urg_ptr;        // 긴급포인터
+	uint16_t src_port;       
+	uint16_t dst_port;       
+	uint32_t seq_num;        
+	uint32_t ack_num;       
+	uint16_t hlen_flags;     
+	uint16_t window;        
+	uint16_t checksum;       
+	uint16_t urg_ptr;      
 };
 
-// UDP Header
 struct udp_header {
-	uint16_t src_port;       // 소스 포트 번호
-	uint16_t dst_port;       // 목적지 포트 번호
-	uint16_t length;         // UDP 데이터그램 크기
-	uint16_t checksum;       // 체크섬
+	uint16_t src_port;       
+	uint16_t dst_port;       
+	uint16_t length;        
+	uint16_t checksum;       
 };
 
 struct ethernet_header	eth_hdr;
@@ -63,13 +59,10 @@ struct ip_header		ip_hdr;
 struct tcp_header		tcp_hdr;
 struct udp_header		udp_hdr;
 
-// Macros
-// pntohs : to convert network-aligned 16bit word to host-aligned one
 #define pntoh16(p)  ((unsigned short)                       \
                     ((unsigned short)*((unsigned char *)(p)+0)<<8|  \
                      (unsigned short)*((unsigned char *)(p)+1)<<0))
 
-// pntohl : to convert network-aligned 32bit word to host-aligned one
 #define pntoh32(p)  ((unsigned short)*((unsigned char *)(p)+0)<<24|  \
                     (unsigned short)*((unsigned char *)(p)+1)<<16|  \
                     (unsigned short)*((unsigned char *)(p)+2)<<8|   \
@@ -77,10 +70,9 @@ struct udp_header		udp_hdr;
 
 int parse_ip_header(unsigned char* data, struct ip_header* ip_hdr)
 {
-	ip_hdr->version = data[0] >> 4;		// IP version
-	ip_hdr->ihl = data[0] & 0x0f;	// IP header length
-	ip_hdr->protocol = data[9];		    // protocol above IP
-	// 실습: 여기에 다른 IP 헤더 필드 정보 추가
+	ip_hdr->version = data[0] >> 4;		
+	ip_hdr->ihl = data[0] & 0x0f;
+	ip_hdr->protocol = data[9];		 
 	ip_hdr->tot_len = pntoh16(&data[2]);
 	ip_hdr->id = pntoh16(&data[4]);
 	ip_hdr->frag_off = pntoh16(&data[6]);
@@ -104,7 +96,6 @@ int parse_ethernet_header(unsigned char* data, struct ethernet_header* eth_hdr)
 		eth_hdr->src_mac[i] = data[i + 6];
 	}
 
-	// ethernet type check
 	eth_hdr->eth_type = pntoh16(&data[12]);
 
 	return 0;
@@ -193,22 +184,20 @@ void print_header_details(struct ethernet_header* eth_hdr, struct ip_header* ip_
 
 void main(int argc, char** argv)
 {
-	struct pcap_file_header	pcap_global_hdr;		// PCAP 글로벌 헤더
-	struct pcap_pkthdr 		pcap_pk_hdr;			// PCAP 패킷 헤더
-	unsigned char			pcap_pk_data[2000];		// PCAP 패킷 데이터
+	struct pcap_file_header	pcap_global_hdr;	
+	struct pcap_pkthdr pcap_pk_hdr;			
+	unsigned char pcap_pk_data[2000];		
 	FILE* fin;
-	int						pk_no, res, offset = 0;
-	double					init_time, curr_time;	// 첫번째 패킷 캡쳐 시간, 현재 패킷 캡쳐 시간
-	unsigned long			net_ip_count = 0, net_etc_count = 0;
-	unsigned long			trans_tcp_count = 0, trans_udp_count = 0, trans_etc_count = 0;
+	int pk_no, res, offset = 0;
+	double init_time, curr_time;	
+	unsigned long net_ip_count = 0, net_etc_count = 0;
+	unsigned long trans_tcp_count = 0, trans_udp_count = 0, trans_etc_count = 0;
 
-	// PCAP 파일 열기
 	fin = fopen("ccc.pcap", "rb");
 	if (fin == NULL) {
 		perror("Error opening file");
 		exit(EXIT_FAILURE);
 	}
-	// 글로벌 헤더 읽기
 	fread((char*)&pcap_global_hdr, sizeof(pcap_global_hdr), 1, fin);
 	if (pcap_global_hdr.magic != 0xA1B2C3D4) {
 		printf("파일 오류: 지원되지 않는 PCAP 파일 형식 (0x%x)\n", pcap_global_hdr.magic);
@@ -217,25 +206,19 @@ void main(int argc, char** argv)
 
 	pk_no = 0;
 	while (1) {
-
-		// 패킷 헤더 읽기
 		if (fread((char*)&pcap_pk_hdr, sizeof(pcap_pk_hdr), 1, fin) == 0)
 			break;
 
-		// 캡쳐한 시간 구하기
 		curr_time = pcap_pk_hdr.ts.tv_sec + pcap_pk_hdr.ts.tv_usec * 0.000001;
 		if (pk_no == 0)
 			init_time = curr_time;
 
-		// 패킷 헤더에 지정된 크기 (caplen)의 캡쳐된 데이터 읽기
 		fread(pcap_pk_data, sizeof(unsigned char), pcap_pk_hdr.caplen, fin);
 
-		// 이더넷 프레임 헤더 분석
 		offset = 0;
 		res = parse_ethernet_header(&pcap_pk_data[offset], &eth_hdr);
 
 		if (eth_hdr.eth_type == ETHERTYPE_IP) {
-			// IP 헤더 분석
 			offset += ETH_II_HSIZE;
 			res = parse_ip_header(&pcap_pk_data[offset], &ip_hdr);
 			net_ip_count++;
