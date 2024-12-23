@@ -173,7 +173,7 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_cha
     custom_header.caplen = custom_data_len;
     custom_header.len = custom_data_len;
 
-    pcap_dump(param, header, pkt_data); // Save packet to file
+    pcap_dump(param, header, pkt_data); 
     free(custom_data);
 }
 
